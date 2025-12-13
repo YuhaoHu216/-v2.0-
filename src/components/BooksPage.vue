@@ -11,138 +11,141 @@
         <div class="search-row">
           <input type="text" v-model="searchParams.publisher" placeholder="出版社" class="search-input">
           <input type="text" v-model="searchParams.category" placeholder="分类" class="search-input">
-          <button class="btn btn-secondary" @click="searchBooks">搜索</button>
-          <button class="btn btn-outline" @click="resetSearch">重置</button>
-          <button class="btn btn-primary" style="margin-left: auto" @click="showAddBookModal">添加图书</button>
+          <el-button type="primary" @click="searchBooks">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="success" style="margin-left: auto" @click="showAddBookModal">添加图书</el-button>
         </div>
       </div>
       
       <!-- 添加图书模态框 -->
-      <div v-if="showAddModal" class="modal-overlay" @click="hideAddBookModal">
-        <div class="modal-content" @click.stop>
-          <h3>添加图书</h3>
-          <form @submit.prevent="addNewBook">
-            <div class="form-group">
-              <label>ISBN:</label>
-              <input type="text" v-model="newBook.isbn" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>书名:</label>
-              <input type="text" v-model="newBook.title" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>作者:</label>
-              <input type="text" v-model="newBook.author" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>出版社:</label>
-              <input type="text" v-model="newBook.publisher" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>出版日期:</label>
-              <input type="date" v-model="newBook.publishDate" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>分类:</label>
-              <input type="text" v-model="newBook.category" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>总数量:</label>
-              <input type="number" v-model="newBook.totalCopies" class="form-input" min="1" required>
-            </div>
-            
-            <div class="form-group">
-              <label>位置:</label>
-              <input type="text" v-model="newBook.location" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>封面图片:</label>
-              <input type="file" @change="handleImageSelect" accept="image/*" class="form-input">
-              <div v-if="newBook.image" class="image-preview">
-                <img :src="newBook.image.startsWith('http') ? newBook.image :  newBook.image" alt="预览图片" class="preview-image">
-              </div>
-            </div>
-            
-            <div class="modal-actions">
-              <button type="button" class="btn btn-outline" @click="hideAddBookModal">取消</button>
-              <button type="submit" class="btn btn-primary">添加</button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <el-dialog v-model="showAddModal" title="添加图书" width="650px" @close="hideAddBookModal">
+        <el-form :model="newBook" label-width="130px">
+          <el-form-item label="ISBN:" prop="isbn" required>
+            <el-input v-model="newBook.isbn" />
+          </el-form-item>
+          
+          <el-form-item label="书名:" prop="title" required>
+            <el-input v-model="newBook.title" />
+          </el-form-item>
+          
+          <el-form-item label="作者:" prop="author" required>
+            <el-input v-model="newBook.author" />
+          </el-form-item>
+          
+          <el-form-item label="出版社:" prop="publisher" required>
+            <el-input v-model="newBook.publisher" />
+          </el-form-item>
+          
+          <el-form-item label="出版日期:" prop="publishDate" required>
+            <el-date-picker
+              v-model="newBook.publishDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+          
+          <el-form-item label="分类:" prop="category" required>
+            <el-input v-model="newBook.category" />
+          </el-form-item>
+          
+          <el-form-item label="总数量:" prop="totalCopies" required>
+            <el-input-number v-model="newBook.totalCopies" :min="1" controls-position="right" style="width: 100%" />
+          </el-form-item>
+          
+          <el-form-item label="位置:" prop="location" required>
+            <el-input v-model="newBook.location" />
+          </el-form-item>
+          
+          <el-form-item label="封面图片:">
+            <el-upload
+              class="avatar-uploader"
+              action="#"
+              :auto-upload="false"
+              :show-file-list="false"
+              :on-change="handleAddImageChange"
+            >
+              <img v-if="newBook.image" :src="newBook.image" class="avatar" />
+              <el-button v-else>选择图片</el-button>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+        
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="hideAddBookModal">取消</el-button>
+            <el-button type="primary" @click="addNewBook">添加</el-button>
+          </span>
+        </template>
+      </el-dialog>
       
       <!-- 编辑图书模态框 -->
-      <div v-if="showEditModal" class="modal-overlay" @click="hideEditBookModal">
-        <div class="modal-content" @click.stop>
-          <h3>编辑图书</h3>
-          <form @submit.prevent="updateBookInfo">
-            <div class="form-group">
-              <label>ISBN:</label>
-              <input type="text" v-model="editBook.isbn" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>书名:</label>
-              <input type="text" v-model="editBook.title" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>作者:</label>
-              <input type="text" v-model="editBook.author" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>出版社:</label>
-              <input type="text" v-model="editBook.publisher" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>出版日期:</label>
-              <input type="date" v-model="editBook.publishDate" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>分类:</label>
-              <input type="text" v-model="editBook.category" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>总数量:</label>
-              <input type="number" v-model="editBook.totalCopies" class="form-input" min="1" required>
-            </div>
-            
-            <div class="form-group">
-              <label>可借数量:</label>
-              <input type="number" v-model="editBook.availableCopies" class="form-input" min="0" required>
-            </div>
-            
-            <div class="form-group">
-              <label>位置:</label>
-              <input type="text" v-model="editBook.location" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label>封面图片:</label>
-              <input type="file" @change="handleEditImageSelect" accept="image/*" class="form-input">
-              <div v-if="editBook.image" class="image-preview">
-                <img :src="editBook.image.startsWith('http') ? editBook.image : editBook.image" alt="预览图片" class="preview-image">
-              </div>
-            </div>
-            
-            <div class="modal-actions">
-              <button type="button" class="btn btn-outline" @click="hideEditBookModal">取消</button>
-              <button type="submit" class="btn btn-primary">更新</button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <el-dialog v-model="showEditModal" title="编辑图书" width="650px" @close="hideEditBookModal">
+        <el-form :model="editBook" label-width="130px">
+          <el-form-item label="ISBN:" prop="isbn" required>
+            <el-input v-model="editBook.isbn" />
+          </el-form-item>
+          
+          <el-form-item label="书名:" prop="title" required>
+            <el-input v-model="editBook.title" />
+          </el-form-item>
+          
+          <el-form-item label="作者:" prop="author" required>
+            <el-input v-model="editBook.author" />
+          </el-form-item>
+          
+          <el-form-item label="出版社:" prop="publisher" required>
+            <el-input v-model="editBook.publisher" />
+          </el-form-item>
+          
+          <el-form-item label="出版日期:" prop="publishDate" required>
+            <el-date-picker
+              v-model="editBook.publishDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+          
+          <el-form-item label="分类:" prop="category" required>
+            <el-input v-model="editBook.category" />
+          </el-form-item>
+          
+          <el-form-item label="总数量:" prop="totalCopies" required>
+            <el-input-number v-model="editBook.totalCopies" :min="1" controls-position="right" style="width: 100%" />
+          </el-form-item>
+          
+          <el-form-item label="可借数量:" prop="availableCopies" required>
+            <el-input-number v-model="editBook.availableCopies" :min="0" controls-position="right" style="width: 100%" />
+          </el-form-item>
+          
+          <el-form-item label="位置:" prop="location" required>
+            <el-input v-model="editBook.location" />
+          </el-form-item>
+          
+          <el-form-item label="封面图片:">
+            <el-upload
+              class="avatar-uploader"
+              action="#"
+              :auto-upload="false"
+              :show-file-list="false"
+              :on-change="handleEditImageChange"
+            >
+              <img v-if="editBook.image" :src="editBook.image" class="avatar" />
+              <el-button v-else>选择图片</el-button>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+        
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="hideEditBookModal">取消</el-button>
+            <el-button type="primary" @click="updateBookInfo">更新</el-button>
+          </span>
+        </template>
+      </el-dialog>
       
       <table class="book-table">
         <thead>
@@ -174,8 +177,8 @@
             <td>{{ book.availableCopies }}</td>
             <td>{{ book.location }}</td>
             <td>
-              <button class="btn btn-sm btn-secondary" @click="showEditBookModal(book)">编辑</button>
-              <button class="btn btn-sm btn-danger" @click="deleteBookById(book.bookId)">删除</button>
+              <el-button size="small" type="primary" @click="showEditBookModal(book)">编辑</el-button>
+              <el-button size="small" type="danger" @click="deleteBookById(book.bookId)">删除</el-button>
             </td>
           </tr>
           <tr v-if="books.length === 0">
@@ -185,9 +188,9 @@
       </table>
       
       <div class="pagination">
-        <button class="btn btn-secondary" @click="changePage(pagination.currentPage - 1)" :disabled="pagination.currentPage <= 1">上一页</button>
+        <el-button type="primary" @click="changePage(pagination.currentPage - 1)" :disabled="pagination.currentPage <= 1">上一页</el-button>
         <span class="page-info">第 {{ pagination.currentPage }} 页，共 {{ pagination.totalPages }} 页</span>
-        <button class="btn btn-secondary" @click="changePage(pagination.currentPage + 1)" :disabled="pagination.currentPage >= pagination.totalPages">下一页</button>
+        <el-button type="primary" @click="changePage(pagination.currentPage + 1)" :disabled="pagination.currentPage >= pagination.totalPages">下一页</el-button>
       </div>
     </div>
   </PageContainer>
@@ -195,6 +198,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElDatePicker, ElButton, ElUpload, ElMessage, ElMessageBox } from 'element-plus'
 import PageContainer from './PageContainer.vue'
 import { getBooksPage, addBook, updateBook, deleteBook, uploadBookImage } from '../api/books.js'
 
@@ -319,61 +323,49 @@ const hideEditBookModal = () => {
   }
 }
 
-// 处理图片选择
-const handleImageSelect = async (event) => {
-  const file = event.target.files[0]
+// 处理添加图书时的图片选择（Element Plus Upload）
+const handleAddImageChange = (uploadFile) => {
+  const file = uploadFile.raw
   if (file) {
-    try {
-      // 立即上传图片
-      const uploadResponse = await uploadBookImage(file)
-      if (uploadResponse.code === 1) {
-        // 上传成功，设置图片URL
-        newBook.value.image = uploadResponse.data
-        // 清空选中的文件，因为我们已经上传了
-        selectedImageFile.value = null
-      } else {
-        alert('图片上传失败：' + uploadResponse.msg)
-        // 重置选择
-        event.target.value = ''
+    uploadBookImage(file)
+      .then(uploadResponse => {
+        if (uploadResponse.code === 1) {
+          // 上传成功，设置图片URL
+          newBook.value.image = uploadResponse.data
+        } else {
+          ElMessage.error('图片上传失败：' + uploadResponse.msg)
+          newBook.value.image = ''
+        }
+      })
+      .catch(error => {
+        console.error('图片上传失败:', error)
+        ElMessage.error('图片上传时发生错误，请查看控制台')
         newBook.value.image = ''
-      }
-    } catch (error) {
-      console.error('图片上传失败:', error)
-      alert('图片上传时发生错误，请查看控制台')
-      // 重置选择
-      event.target.value = ''
-      newBook.value.image = ''
-    }
+      })
   } else {
     newBook.value.image = ''
   }
 }
 
-// 处理编辑时的图片选择
-const handleEditImageSelect = async (event) => {
-  const file = event.target.files[0]
+// 处理编辑图书时的图片选择（Element Plus Upload）
+const handleEditImageChange = (uploadFile) => {
+  const file = uploadFile.raw
   if (file) {
-    try {
-      // 立即上传图片
-      const uploadResponse = await uploadBookImage(file)
-      if (uploadResponse.code === 1) {
-        // 上传成功，设置图片URL
-        editBook.value.image = uploadResponse.data
-        // 清空选中的文件，因为我们已经上传了
-        selectedImageFile.value = null
-      } else {
-        alert('图片上传失败：' + uploadResponse.msg)
-        // 重置选择
-        event.target.value = ''
+    uploadBookImage(file)
+      .then(uploadResponse => {
+        if (uploadResponse.code === 1) {
+          // 上传成功，设置图片URL
+          editBook.value.image = uploadResponse.data
+        } else {
+          ElMessage.error('图片上传失败：' + uploadResponse.msg)
+          editBook.value.image = ''
+        }
+      })
+      .catch(error => {
+        console.error('图片上传失败:', error)
+        ElMessage.error('图片上传时发生错误，请查看控制台')
         editBook.value.image = ''
-      }
-    } catch (error) {
-      console.error('图片上传失败:', error)
-      alert('图片上传时发生错误，请查看控制台')
-      // 重置选择
-      event.target.value = ''
-      editBook.value.image = ''
-    }
+      })
   } else {
     editBook.value.image = ''
   }
@@ -388,13 +380,13 @@ const addNewBook = async () => {
       fetchBooks()
       // 隐藏模态框并重置表单
       hideAddBookModal()
-      alert('图书添加成功！')
+      ElMessage.success('图书添加成功！')
     } else {
-      alert('图书添加失败：' + response.msg)
+      ElMessage.error('图书添加失败：' + response.msg)
     }
   } catch (error) {
     console.error('添加图书失败:', error)
-    alert('添加图书时发生错误，请查看控制台')
+    ElMessage.error('添加图书时发生错误，请查看控制台')
   }
 }
 
@@ -407,34 +399,38 @@ const updateBookInfo = async () => {
       fetchBooks()
       // 隐藏模态框并重置表单
       hideEditBookModal()
-      alert('图书更新成功！')
+      ElMessage.success('图书更新成功！')
     } else {
-      alert('图书更新失败：' + response.msg)
+      ElMessage.error('图书更新失败：' + response.msg)
     }
   } catch (error) {
     console.error('更新图书失败:', error)
-    alert('更新图书时发生错误，请查看控制台')
+    ElMessage.error('更新图书时发生错误，请查看控制台')
   }
 }
 
 // 删除图书
 const deleteBookById = async (bookId) => {
-  if (!confirm('确定要删除这本书吗？')) {
-    return;
-  }
-  
   try {
+    await ElMessageBox.confirm('确定要删除这本书吗？', '确认删除', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+    
     const response = await deleteBook(bookId);
     if (response.code === 1) {
       // 删除成功后刷新列表
       fetchBooks();
-      alert('图书删除成功！');
+      ElMessage.success('图书删除成功！');
     } else {
-      alert('图书删除失败：' + response.msg);
+      ElMessage.error('图书删除失败：' + response.msg);
     }
   } catch (error) {
-    console.error('删除图书失败:', error);
-    alert('删除图书时发生错误，请查看控制台');
+    if (error !== 'cancel') {
+      console.error('删除图书失败:', error);
+      ElMessage.error('删除图书时发生错误，请查看控制台');
+    }
   }
 }
 
@@ -523,12 +519,6 @@ onMounted(() => {
   max-width: 200px;
 }
 
-.btn-outline {
-  background-color: transparent;
-  color: #6c757d;
-  border: 1px solid #6c757d;
-}
-
 .book-table {
   width: 100%;
   border-collapse: collapse;
@@ -557,39 +547,6 @@ onMounted(() => {
   object-fit: cover;
 }
 
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 5px;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #42b983;
-  color: white;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 0.875rem;
-}
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -608,68 +565,30 @@ onMounted(() => {
   color: #6c757d;
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
 }
 
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
 }
 
-.image-preview {
-  margin-top: 10px;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 4px;
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>
