@@ -23,6 +23,17 @@ export async function post(url, data) {
   }
 }
 
+// 封装PUT请求
+export async function put(url, data) {
+  try {
+    const response = await http.put(url, data)
+    return response.data
+  } catch (error) {
+    console.error('请求失败:', error)
+    throw error
+  }
+}
+
 // 封装文件上传POST请求
 export async function uploadFile(url, file) {
   try {

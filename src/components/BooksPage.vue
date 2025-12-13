@@ -78,6 +78,72 @@
         </div>
       </div>
       
+      <!-- 编辑图书模态框 -->
+      <div v-if="showEditModal" class="modal-overlay" @click="hideEditBookModal">
+        <div class="modal-content" @click.stop>
+          <h3>编辑图书</h3>
+          <form @submit.prevent="updateBookInfo">
+            <div class="form-group">
+              <label>ISBN:</label>
+              <input type="text" v-model="editBook.isbn" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>书名:</label>
+              <input type="text" v-model="editBook.title" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>作者:</label>
+              <input type="text" v-model="editBook.author" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>出版社:</label>
+              <input type="text" v-model="editBook.publisher" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>出版日期:</label>
+              <input type="date" v-model="editBook.publishDate" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>分类:</label>
+              <input type="text" v-model="editBook.category" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>总数量:</label>
+              <input type="number" v-model="editBook.totalCopies" class="form-input" min="1" required>
+            </div>
+            
+            <div class="form-group">
+              <label>可借数量:</label>
+              <input type="number" v-model="editBook.availableCopies" class="form-input" min="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label>位置:</label>
+              <input type="text" v-model="editBook.location" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label>封面图片:</label>
+              <input type="file" @change="handleEditImageSelect" accept="image/*" class="form-input">
+              <div v-if="editBook.image" class="image-preview">
+                <img :src="editBook.image.startsWith('http') ? editBook.image : editBook.image" alt="预览图片" class="preview-image">
+              </div>
+            </div>
+            
+            <div class="modal-actions">
+              <button type="button" class="btn btn-outline" @click="hideEditBookModal">取消</button>
+              <button type="submit" class="btn btn-primary">更新</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
       <table class="book-table">
         <thead>
           <tr>
@@ -108,7 +174,7 @@
             <td>{{ book.availableCopies }}</td>
             <td>{{ book.location }}</td>
             <td>
-              <button class="btn btn-sm btn-secondary">编辑</button>
+              <button class="btn btn-sm btn-secondary" @click="showEditBookModal(book)">编辑</button>
               <button class="btn btn-sm btn-danger">删除</button>
             </td>
           </tr>
@@ -130,7 +196,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import PageContainer from './PageContainer.vue'
-import { getBooksPage, addBook, uploadBookImage } from '../api/books.js'
+import { getBooksPage, addBook, updateBook, uploadBookImage } from '../api/books.js'
 
 // 图书数据
 const books = ref([])
@@ -164,8 +230,27 @@ const newBook = ref({
   status: 1
 })
 
+// 编辑图书表单数据
+const editBook = ref({
+  bookId: null,
+  isbn: '',
+  image: '',
+  title: '',
+  author: '',
+  publisher: '',
+  publishDate: '',
+  category: '',
+  totalCopies: 1,
+  availableCopies: 1,
+  location: '',
+  status: 1
+})
+
 // 控制添加图书模态框显示状态
 const showAddModal = ref(false)
+
+// 控制编辑图书模态框显示状态
+const showEditModal = ref(false)
 
 // 选中的图片文件
 const selectedImageFile = ref(null)
@@ -180,6 +265,46 @@ const hideAddBookModal = () => {
   showAddModal.value = false
   // 重置表单
   newBook.value = {
+    isbn: '',
+    image: '',
+    title: '',
+    author: '',
+    publisher: '',
+    publishDate: '',
+    category: '',
+    totalCopies: 1,
+    availableCopies: 1,
+    location: '',
+    status: 1
+  }
+}
+
+// 显示编辑图书模态框
+const showEditBookModal = (book) => {
+  showEditModal.value = true
+  // 填充表单数据
+  editBook.value = {
+    bookId: book.bookId,
+    isbn: book.isbn || '',
+    image: book.image || '',
+    title: book.title || '',
+    author: book.author || '',
+    publisher: book.publisher || '',
+    publishDate: book.publishDate || '',
+    category: book.category || '',
+    totalCopies: book.totalCopies || 1,
+    availableCopies: book.availableCopies || 1,
+    location: book.location || '',
+    status: book.status || 1
+  }
+}
+
+// 隐藏编辑图书模态框
+const hideEditBookModal = () => {
+  showEditModal.value = false
+  // 重置表单
+  editBook.value = {
+    bookId: null,
     isbn: '',
     image: '',
     title: '',
@@ -224,6 +349,36 @@ const handleImageSelect = async (event) => {
   }
 }
 
+// 处理编辑时的图片选择
+const handleEditImageSelect = async (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    try {
+      // 立即上传图片
+      const uploadResponse = await uploadBookImage(file)
+      if (uploadResponse.code === 1) {
+        // 上传成功，设置图片URL
+        editBook.value.image = uploadResponse.data
+        // 清空选中的文件，因为我们已经上传了
+        selectedImageFile.value = null
+      } else {
+        alert('图片上传失败：' + uploadResponse.msg)
+        // 重置选择
+        event.target.value = ''
+        editBook.value.image = ''
+      }
+    } catch (error) {
+      console.error('图片上传失败:', error)
+      alert('图片上传时发生错误，请查看控制台')
+      // 重置选择
+      event.target.value = ''
+      editBook.value.image = ''
+    }
+  } else {
+    editBook.value.image = ''
+  }
+}
+
 // 添加图书
 const addNewBook = async () => {
   try {
@@ -240,6 +395,25 @@ const addNewBook = async () => {
   } catch (error) {
     console.error('添加图书失败:', error)
     alert('添加图书时发生错误，请查看控制台')
+  }
+}
+
+// 更新图书
+const updateBookInfo = async () => {
+  try {
+    const response = await updateBook(editBook.value)
+    if (response.code === 1) {
+      // 更新成功后刷新列表
+      fetchBooks()
+      // 隐藏模态框并重置表单
+      hideEditBookModal()
+      alert('图书更新成功！')
+    } else {
+      alert('图书更新失败：' + response.msg)
+    }
+  } catch (error) {
+    console.error('更新图书失败:', error)
+    alert('更新图书时发生错误，请查看控制台')
   }
 }
 
