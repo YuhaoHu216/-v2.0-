@@ -34,13 +34,13 @@ const switchTab = (tabId) => {
 <style scoped>
 .navbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  background-color: #2c3e50;
-  color: white;
+  background-color: white;
+  color: #2c3e50;
   padding: 0 15px;
   height: 50px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  border-bottom: 1px solid #e0e0e0;
   position: fixed;
   top: 0;
   left: 0;
@@ -72,5 +72,6 @@ const switchTab = (tabId) => {
 
 .nav-tab.active {
   background-color: #42b983;
+  color: white;
 }
 </style>
