@@ -52,3 +52,14 @@ export async function uploadFile(url, file) {
     throw error
   }
 }
+
+// 封装DELETE请求
+export async function del(url) {
+  try {
+    const response = await http.delete(url)
+    return response.data
+  } catch (error) {
+    console.error('请求失败:', error)
+    throw error
+  }
+}

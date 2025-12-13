@@ -175,7 +175,7 @@
             <td>{{ book.location }}</td>
             <td>
               <button class="btn btn-sm btn-secondary" @click="showEditBookModal(book)">编辑</button>
-              <button class="btn btn-sm btn-danger">删除</button>
+              <button class="btn btn-sm btn-danger" @click="deleteBookById(book.bookId)">删除</button>
             </td>
           </tr>
           <tr v-if="books.length === 0">
@@ -196,7 +196,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import PageContainer from './PageContainer.vue'
-import { getBooksPage, addBook, updateBook, uploadBookImage } from '../api/books.js'
+import { getBooksPage, addBook, updateBook, deleteBook, uploadBookImage } from '../api/books.js'
 
 // 图书数据
 const books = ref([])
@@ -414,6 +414,27 @@ const updateBookInfo = async () => {
   } catch (error) {
     console.error('更新图书失败:', error)
     alert('更新图书时发生错误，请查看控制台')
+  }
+}
+
+// 删除图书
+const deleteBookById = async (bookId) => {
+  if (!confirm('确定要删除这本书吗？')) {
+    return;
+  }
+  
+  try {
+    const response = await deleteBook(bookId);
+    if (response.code === 1) {
+      // 删除成功后刷新列表
+      fetchBooks();
+      alert('图书删除成功！');
+    } else {
+      alert('图书删除失败：' + response.msg);
+    }
+  } catch (error) {
+    console.error('删除图书失败:', error);
+    alert('删除图书时发生错误，请查看控制台');
   }
 }
 

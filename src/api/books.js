@@ -1,4 +1,4 @@
-import { post, put, uploadFile } from './http.js';
+import { post, put, del, uploadFile } from './http.js';
 
 // 获取图书分页数据
 export async function getBooksPage(pageNum = 1, pageSize = 10, searchParams = {}) {
@@ -24,4 +24,9 @@ export async function updateBook(bookData) {
 // 上传图书封面图片
 export async function uploadBookImage(file) {
   return await uploadFile('/upload', file);
+}
+
+// 删除图书
+export async function deleteBook(bookId) {
+  return await del(`/books?bookId=${bookId}`);
 }
