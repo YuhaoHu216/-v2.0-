@@ -49,7 +49,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { readerLogin } from '../api/readers.js'
+import { readerLogin, adminLogin, getAdminInfo } from '../api/readers.js'
 
 // 登录表单数据
 const loginForm = ref({
@@ -74,22 +74,51 @@ const handleLogin = async () => {
   // 简单的验证（实际项目中应该与后端API交互）
   if (loginForm.value.username && loginForm.value.password) {
     try {
-      // 调用后端登录接口
-      const response = await readerLogin(loginForm.value.username, loginForm.value.password)
+      let response;
+      
+      // 根据角色调用不同的登录接口
+      if (loginForm.value.role === 'admin') {
+        // 调用管理员登录接口
+        response = await adminLogin(loginForm.value.username, loginForm.value.password)
+      } else {
+        // 调用用户登录接口
+        response = await readerLogin(loginForm.value.username, loginForm.value.password)
+      }
       
       if (response.code === 1) {
         // 登录成功，保存token和用户信息
         localStorage.setItem('token', response.data)
         localStorage.setItem('isUserLoggedIn', 'true')
-        localStorage.setItem('currentUser', JSON.stringify({ 
-          username: loginForm.value.username,
-          role: loginForm.value.role
-        }))
         
-        // 根据角色跳转到不同页面
         if (loginForm.value.role === 'admin') {
-          router.push('/admin/books')
+          // 管理员登录成功后获取管理员详细信息
+          try {
+            const adminInfoResponse = await getAdminInfo()
+            if (adminInfoResponse.code === 1) {
+              const adminInfo = adminInfoResponse.data
+              localStorage.setItem('currentUser', JSON.stringify({ 
+                username: loginForm.value.username,
+                role: loginForm.value.role,
+                adminType: adminInfo.adminType
+              }))
+              
+              // 根据角色跳转到不同页面
+              router.push('/admin/books')
+            } else {
+              errorMessage.value = adminInfoResponse.msg || '获取管理员信息失败'
+            }
+          } catch (infoError) {
+            console.error('获取管理员信息错误:', infoError)
+            errorMessage.value = '获取管理员信息失败'
+          }
         } else {
+          // 用户登录
+          localStorage.setItem('currentUser', JSON.stringify({ 
+            username: loginForm.value.username,
+            role: loginForm.value.role
+          }))
+          
+          // 根据角色跳转到不同页面
           router.push('/user/books')
         }
       } else {

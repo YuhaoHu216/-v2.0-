@@ -3,7 +3,7 @@
     <div class="nav-brand">书城管理系统</div>
     <ul class="nav-tabs">
       <li 
-        v-for="tab in tabs" 
+        v-for="tab in filteredTabs" 
         :key="tab.id"
         :class="{ active: activeTab === tab.id }"
         @click="switchTab(tab.id)"
@@ -16,7 +16,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  showAdminTab: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const activeTab = defineModel('activeTab')
 
@@ -24,7 +31,18 @@ const tabs = [
   { id: 'books', name: '图书管理' },
   { id: 'users', name: '用户管理' },
   { id: 'borrowings', name: '借阅管理' },
+  { id: 'admins', name: '管理员管理' }
 ]
+
+// 根据showAdminTab属性过滤tabs
+const filteredTabs = computed(() => {
+  if (props.showAdminTab) {
+    return tabs
+  } else {
+    // 如果不显示管理员tab，则过滤掉管理员管理选项
+    return tabs.filter(tab => tab.id !== 'admins')
+  }
+})
 
 const switchTab = (tabId) => {
   activeTab.value = tabId

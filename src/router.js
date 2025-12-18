@@ -31,7 +31,8 @@ const routes = [
     { path: '', redirect: 'books' },
     { path: 'books', component: () => import('./components/BooksPage.vue') },
     { path: 'users', component: () => import('./components/UsersPage.vue') },
-    { path: 'borrowings', component: () => import('./components/Borrowings.vue') }
+    { path: 'borrowings', component: () => import('./components/Borrowings.vue') },
+    { path: 'admins', component: () => import('./components/AdminsPage.vue') }
   ]}
 ]
 
