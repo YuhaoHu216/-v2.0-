@@ -73,6 +73,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getBooksPage } from '../api/books.js'
+import { borrowBook as apiBorrowBook } from '../api/readers.js'
 import UserNavbar from './UserNavbar.vue'
 
 // 数据响应式变量
@@ -125,9 +126,34 @@ const changePage = (newPage) => {
 }
 
 // 借阅图书
-const borrowBook = (book) => {
-  alert(`已申请借阅《${book.title}》`)
-  // 实际项目中这里应该调用借阅API
+const borrowBook = async (book) => {
+  // 检查书籍是否可借
+  if (book.availableCopies <= 0) {
+    alert('该书籍已全部借出')
+    return
+  }
+  
+  try {
+    const response = await apiBorrowBook(book.bookId)
+    if (response.code === 1) {
+      alert(`成功借阅《${book.title}》`)
+      // 更新书籍的可借数量
+      book.availableCopies -= 1
+    } else if (response.code === -1) {
+      // 处理特定错误码，比如已借阅过该书
+      alert(`借阅失败: ${response.message || '您已借阅过此书'}`)
+    } else {
+      alert(`借阅失败: ${response.message || '未知错误'}`)
+    }
+  } catch (error) {
+    console.error('借阅失败:', error)
+    if (error.response && error.response.status === 401) {
+      alert('请先登录后再借书')
+      router.push('/login')
+    } else {
+      alert('借阅失败，请稍后重试')
+    }
+  }
 }
 
 // 退出登录

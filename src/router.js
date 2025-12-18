@@ -25,6 +25,7 @@ const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', component: Login },
   { path: '/user/books', component: UserBooksPage, beforeEnter: requireUserAuth },
+  { path: '/user/borrowed', component: () => import('./components/BorrowedBooksPage.vue'), beforeEnter: requireUserAuth },
   
   // 管理员路由
   { path: '/admin', component: AdminLayout, beforeEnter: requireAdminAuth, children: [

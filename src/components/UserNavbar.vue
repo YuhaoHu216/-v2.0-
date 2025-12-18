@@ -1,6 +1,6 @@
 <template>
   <nav class="user-navbar">
-    <div class="nav-brand">书城用户中心</div>
+    <div class="nav-brand">书城</div>
     <ul class="nav-tabs">
       <li 
         v-for="tab in tabs" 
@@ -28,7 +28,8 @@ const route = useRoute()
 const currentUser = ref(null)
 
 const tabs = [
-  { path: '/user/books', name: '图书浏览' }
+  { path: '/user/books', name: '图书浏览' },
+  { path: '/user/borrowed', name: '已借书籍' }
 ]
 
 // 检查当前路由是否激活

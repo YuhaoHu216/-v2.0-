@@ -24,3 +24,18 @@ export async function adminLogin(username, password) {
 export async function getAdminInfo() {
   return await get('/admin/me');
 }
+
+// 借书功能
+export async function borrowBook(bookId) {
+  return await post(`/readers/borrow?bookId=${bookId}`, {});
+}
+
+// 获取读者信息
+export async function getReaderInfo() {
+  return await get('/readers/me');
+}
+
+// 获取借阅记录
+export async function getBorrowRecords(data) {
+  return await post('/borrowRecords/page', data);
+}
