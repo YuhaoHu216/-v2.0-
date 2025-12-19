@@ -39,3 +39,15 @@ export async function getReaderInfo() {
 export async function getBorrowRecords(data) {
   return await post('/borrowRecords/page', data);
 }
+
+// 获取读者分页列表
+export async function getReadersPage(pageNum, pageSize, params = {}) {
+  // 构造查询参数
+  const queryParams = new URLSearchParams({
+    pageNum: pageNum,
+    pageSize: pageSize,
+    ...params
+  }).toString();
+  
+  return await get(`/readers/page/list?${queryParams}`);
+}
