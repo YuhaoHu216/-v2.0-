@@ -174,7 +174,7 @@
 import { ref, onMounted } from 'vue'
 import { ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElRadioGroup, ElRadio, ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
 import PageContainer from './PageContainer.vue'
-import { getReadersPage } from '../api/readers.js'
+import { getReadersPage, addReader, updateReader, deleteReader } from '../api/readers.js'
 
 // 用户数据
 const users = ref([])
@@ -279,41 +279,45 @@ const hideEditUserModal = () => {
   }
 }
 
-// 添加用户（模拟实现，实际需要调用API）
+// 添加用户
 const addNewUser = async () => {
   try {
-    // 这里应该是调用添加用户的API
-    // const response = await addReader(newUser.value)
-    // 暂时使用模拟数据
-    ElMessage.success('用户添加成功！')
-    // 添加成功后刷新列表
-    fetchUsers()
-    // 隐藏模态框并重置表单
-    hideAddUserModal()
+    const response = await addReader(newUser.value)
+    if (response.code === 1) {
+      ElMessage.success('用户添加成功！')
+      // 添加成功后刷新列表
+      fetchUsers()
+      // 隐藏模态框并重置表单
+      hideAddUserModal()
+    } else {
+      ElMessage.error('用户添加失败：' + response.msg)
+    }
   } catch (error) {
     console.error('添加用户失败:', error)
     ElMessage.error('添加用户时发生错误，请查看控制台')
   }
 }
 
-// 更新用户（模拟实现，实际需要调用API）
+// 更新用户
 const updateUserInfo = async () => {
   try {
-    // 这里应该是调用更新用户的API
-    // const response = await updateReader(editUser.value)
-    // 暂时使用模拟数据
-    ElMessage.success('用户更新成功！')
-    // 更新成功后刷新列表
-    fetchUsers()
-    // 隐藏模态框并重置表单
-    hideEditUserModal()
+    const response = await updateReader(editUser.value)
+    if (response.code === 1) {
+      ElMessage.success('用户更新成功！')
+      // 更新成功后刷新列表
+      fetchUsers()
+      // 隐藏模态框并重置表单
+      hideEditUserModal()
+    } else {
+      ElMessage.error('用户更新失败：' + response.msg)
+    }
   } catch (error) {
     console.error('更新用户失败:', error)
     ElMessage.error('更新用户时发生错误，请查看控制台')
   }
 }
 
-// 删除用户（模拟实现，实际需要调用API）
+// 删除用户
 const deleteUserById = async (readerId) => {
   try {
     await ElMessageBox.confirm('确定要删除这个用户吗？', '确认删除', {
@@ -322,12 +326,14 @@ const deleteUserById = async (readerId) => {
       type: 'warning'
     });
     
-    // 这里应该是调用删除用户的API
-    // const response = await deleteReader(readerId);
-    // 暂时使用模拟数据
-    ElMessage.success('用户删除成功！');
-    // 删除成功后刷新列表
-    fetchUsers();
+    const response = await deleteReader(readerId);
+    if (response.code === 1) {
+      ElMessage.success('用户删除成功！');
+      // 删除成功后刷新列表
+      fetchUsers();
+    } else {
+      ElMessage.error('用户删除失败：' + response.msg);
+    }
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除用户失败:', error);

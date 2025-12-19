@@ -1,4 +1,4 @@
-import { post, get } from './http.js';
+import { post, get, put, del } from './http.js';
 
 // 用户登录
 export async function readerLogin(username, password) {
@@ -42,12 +42,27 @@ export async function getBorrowRecords(data) {
 
 // 获取读者分页列表
 export async function getReadersPage(pageNum, pageSize, params = {}) {
-  // 构造查询参数
-  const queryParams = new URLSearchParams({
+  // 构造请求数据
+  const requestData = {
     pageNum: pageNum,
     pageSize: pageSize,
     ...params
-  }).toString();
+  };
   
-  return await get(`/readers/page/list?${queryParams}`);
+  return await post('/readers/page/list', requestData);
+}
+
+// 添加读者
+export async function addReader(readerData) {
+  return await post('/readers', readerData);
+}
+
+// 更新读者
+export async function updateReader(readerData) {
+  return await put('/readers', readerData);
+}
+
+// 删除读者
+export async function deleteReader(readerId) {
+  return await del(`/readers?readerId=${readerId}`);
 }
