@@ -55,28 +55,7 @@
         </template>
       </el-dialog>
       
-      <!-- 编辑管理员模态框 -->
-      <el-dialog v-model="showEditModal" title="编辑管理员" width="500px" @close="hideEditAdminModal">
-        <el-form :model="editAdmin" label-width="100px">
-          <el-form-item label="用户名:" prop="username" required>
-            <el-input v-model="editAdmin.username" />
-          </el-form-item>
-          
-          <el-form-item label="管理员类型:" prop="adminType" required>
-            <el-select v-model="editAdmin.adminType" placeholder="请选择管理员类型">
-              <el-option label="超级管理员" :value="1" />
-              <el-option label="普通管理员" :value="0" />
-            </el-select>
-          </el-form-item>
-        </el-form>
-        
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="hideEditAdminModal">取消</el-button>
-            <el-button type="primary" @click="updateAdminInfo">更新</el-button>
-          </span>
-        </template>
-      </el-dialog>
+
       
       <table class="admin-table">
         <thead>
@@ -97,8 +76,6 @@
             <td>{{ admin.adminType === 1 ? '超级管理员' : '普通管理员' }}</td>
             <td>{{ admin.lastLogin || '从未登录' }}</td>
             <td>
-              <el-button size="small" type="primary" @click="showEditAdminModal(admin)">编辑</el-button>
-              <el-button size="small" type="warning" @click="resetPassword(admin.adminId)">重置密码</el-button>
               <el-button size="small" type="danger" @click="deleteAdminById(admin.adminId)" :disabled="admin.adminId === 1">删除</el-button>
             </td>
           </tr>
@@ -121,7 +98,7 @@
 import { ref, onMounted } from 'vue'
 import { ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElButton, ElMessage, ElMessageBox, ElDatePicker } from 'element-plus'
 import PageContainer from './PageContainer.vue'
-import { getAdminsPage, addAdmin, updateAdmin, deleteAdmin, resetAdminPassword } from '../api/admins.js'
+import { getAdminsPage, addAdmin, deleteAdmin } from '../api/admins.js'
 
 // 管理员数据
 const admins = ref([])
@@ -147,18 +124,8 @@ const newAdmin = ref({
   realName: ''
 })
 
-// 编辑管理员表单数据
-const editAdmin = ref({
-  adminId: null,
-  username: '',
-  adminType: 0
-})
-
 // 控制添加管理员模态框显示状态
 const showAddModal = ref(false)
-
-// 控制编辑管理员模态框显示状态
-const showEditModal = ref(false)
 
 // 显示添加管理员模态框
 const showAddAdminModal = () => {
@@ -173,28 +140,6 @@ const hideAddAdminModal = () => {
     username: '',
     password: '',
     realName: ''
-  }
-}
-
-// 显示编辑管理员模态框
-const showEditAdminModal = (admin) => {
-  showEditModal.value = true
-  // 填充表单数据
-  editAdmin.value = {
-    adminId: admin.adminId,
-    username: admin.username,
-    adminType: admin.adminType
-  }
-}
-
-// 隐藏编辑管理员模态框
-const hideEditAdminModal = () => {
-  showEditModal.value = false
-  // 重置表单
-  editAdmin.value = {
-    adminId: null,
-    username: '',
-    adminType: 0
   }
 }
 
@@ -219,30 +164,6 @@ const addNewAdmin = async () => {
   } catch (error) {
     console.error('添加管理员失败:', error)
     ElMessage.error('添加管理员时发生错误，请查看控制台')
-  }
-}
-
-// 更新管理员
-const updateAdminInfo = async () => {
-  if (!editAdmin.value.username) {
-    ElMessage.error('用户名不能为空')
-    return
-  }
-  
-  try {
-    const response = await updateAdmin(editAdmin.value)
-    if (response.code === 1) {
-      // 更新成功后刷新列表
-      fetchAdmins()
-      // 隐藏模态框并重置表单
-      hideEditAdminModal()
-      ElMessage.success('管理员更新成功！')
-    } else {
-      ElMessage.error('管理员更新失败：' + response.msg)
-    }
-  } catch (error) {
-    console.error('更新管理员失败:', error)
-    ElMessage.error('更新管理员时发生错误，请查看控制台')
   }
 }
 
@@ -273,29 +194,6 @@ const deleteAdminById = async (adminId) => {
     if (error !== 'cancel') {
       console.error('删除管理员失败:', error);
       ElMessage.error('删除管理员时发生错误，请查看控制台');
-    }
-  }
-}
-
-// 重置管理员密码
-const resetPassword = async (adminId) => {
-  try {
-    await ElMessageBox.confirm('确定要重置这个管理员的密码吗？默认密码为123456', '确认重置密码', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    });
-    
-    const response = await resetAdminPassword(adminId);
-    if (response.code === 1) {
-      ElMessage.success('管理员密码重置成功！');
-    } else {
-      ElMessage.error('管理员密码重置失败：' + response.msg);
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('重置管理员密码失败:', error);
-      ElMessage.error('重置管理员密码时发生错误，请查看控制台');
     }
   }
 }
