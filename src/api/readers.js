@@ -44,7 +44,7 @@ export async function getBorrowRecords(data) {
 export async function getReadersPage(pageNum, pageSize, params = {}) {
   // 构造请求数据
   const requestData = {
-    pageNum: pageNum,
+    page: pageNum,
     pageSize: pageSize,
     ...params
   };
@@ -54,7 +54,7 @@ export async function getReadersPage(pageNum, pageSize, params = {}) {
 
 // 添加读者
 export async function addReader(readerData) {
-  return await post('/readers', readerData);
+  return await post('/readers/register', readerData);
 }
 
 // 更新读者

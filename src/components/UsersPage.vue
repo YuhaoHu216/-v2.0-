@@ -10,6 +10,11 @@
         </div>
         <div class="search-row">
           <input type="text" v-model="searchParams.department" placeholder="部门" class="search-input">
+          <el-select v-model="searchParams.readerType" placeholder="用户类型" clearable class="search-input">
+            <el-option label="学生" :value="0"></el-option>
+            <el-option label="教师" :value="1"></el-option>
+            <el-option label="职工" :value="2"></el-option>
+          </el-select>
           <el-select v-model="searchParams.status" placeholder="状态" clearable class="search-input">
             <el-option label="启用" :value="1"></el-option>
             <el-option label="禁用" :value="0"></el-option>
@@ -49,8 +54,9 @@
           
           <el-form-item label="用户类型:" prop="readerType" required>
             <el-select v-model="newUser.readerType" style="width: 100%">
-              <el-option label="学生" :value="1"></el-option>
-              <el-option label="教师" :value="2"></el-option>
+              <el-option label="学生" :value="0"></el-option>
+              <el-option label="教师" :value="1"></el-option>
+              <el-option label="职工" :value="2"></el-option>
             </el-select>
           </el-form-item>
           
@@ -99,8 +105,9 @@
           
           <el-form-item label="用户类型:" prop="readerType" required>
             <el-select v-model="editUser.readerType" style="width: 100%">
-              <el-option label="学生" :value="1"></el-option>
-              <el-option label="教师" :value="2"></el-option>
+              <el-option label="学生" :value="0"></el-option>
+              <el-option label="教师" :value="1"></el-option>
+              <el-option label="职工" :value="2"></el-option>
             </el-select>
           </el-form-item>
           
@@ -142,7 +149,7 @@
             <td>{{ user.readerName }}</td>
             <td>{{ user.phoneNumber }}</td>
             <td>{{ user.department }}</td>
-            <td>{{ user.readerType === 1 ? '学生' : user.readerType === 2 ? '教师' : '未知' }}</td>
+            <td>{{ user.readerType === 0 ? '学生' : user.readerType === 1 ? '教师' : user.readerType === 2 ? '职工' : '未知' }}</td>
             <td>{{ user.maxBorrowCount }}</td>
             <td>{{ user.currentBorrowCount }}</td>
             <td>
@@ -190,6 +197,7 @@ const searchParams = ref({
   readerName: '',
   phoneNumber: '',
   department: '',
+  readerType: null,
   status: null
 })
 
@@ -200,9 +208,7 @@ const newUser = ref({
   readerName: '',
   phoneNumber: '',
   department: '',
-  maxBorrowCount: 5,
-  readerType: 1,
-  status: 1
+  readerType: 0
 })
 
 // 编辑用户表单数据
@@ -239,9 +245,7 @@ const hideAddUserModal = () => {
     readerName: '',
     phoneNumber: '',
     department: '',
-    maxBorrowCount: 5,
-    readerType: 1,
-    status: 1
+    readerType: 0
   }
 }
 
@@ -282,7 +286,17 @@ const hideEditUserModal = () => {
 // 添加用户
 const addNewUser = async () => {
   try {
-    const response = await addReader(newUser.value)
+    // 创建只包含所需字段的对象
+    const userData = {
+      account: newUser.value.account,
+      password: newUser.value.password,
+      readerName: newUser.value.readerName,
+      phoneNumber: newUser.value.phoneNumber,
+      department: newUser.value.department,
+      readerType: newUser.value.readerType
+    }
+    
+    const response = await addReader(userData)
     if (response.code === 1) {
       ElMessage.success('用户添加成功！')
       // 添加成功后刷新列表
@@ -365,6 +379,7 @@ const resetSearch = () => {
     readerName: '',
     phoneNumber: '',
     department: '',
+    readerType: null,
     status: null
   }
   fetchUsers(1)
