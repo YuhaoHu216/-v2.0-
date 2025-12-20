@@ -47,7 +47,7 @@ export async function updateAdmin(adminData) {
 
 // 删除管理员
 export async function deleteAdmin(adminId) {
-  return await del(`/admins?adminId=${adminId}`);
+  return await del(`/admin/delete?adminId=${adminId}`);
 }
 
 // 重置管理员密码
