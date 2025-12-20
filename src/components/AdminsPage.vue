@@ -42,11 +42,8 @@
             <el-input v-model="newAdmin.password" type="password" />
           </el-form-item>
           
-          <el-form-item label="管理员类型:" prop="adminType" required>
-            <el-select v-model="newAdmin.adminType" placeholder="请选择管理员类型">
-              <el-option label="超级管理员" :value="1" />
-              <el-option label="普通管理员" :value="0" />
-            </el-select>
+          <el-form-item label="真实姓名:" prop="realName" required>
+            <el-input v-model="newAdmin.realName" />
           </el-form-item>
         </el-form>
         
@@ -147,7 +144,7 @@ const searchParams = ref({
 const newAdmin = ref({
   username: '',
   password: '',
-  adminType: 0
+  realName: ''
 })
 
 // 编辑管理员表单数据
@@ -175,7 +172,7 @@ const hideAddAdminModal = () => {
   newAdmin.value = {
     username: '',
     password: '',
-    adminType: 0
+    realName: ''
   }
 }
 

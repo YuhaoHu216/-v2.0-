@@ -30,7 +30,14 @@ export async function getAdminsPage(pageNum = 1, pageSize = 10, searchParams = {
 
 // 添加管理员
 export async function addAdmin(adminData) {
-  return await post('/admins', adminData);
+  // 构建符合新接口要求的请求数据
+  const requestData = {
+    username: adminData.username,
+    password: adminData.password,
+    realName: adminData.realName
+  };
+  
+  return await post('/admin/add', requestData);
 }
 
 // 更新管理员
