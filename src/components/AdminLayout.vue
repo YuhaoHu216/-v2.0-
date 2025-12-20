@@ -13,6 +13,7 @@ import Navbar from './Navbar.vue'
 import BooksPage from './BooksPage.vue'
 import UsersPage from './UsersPage.vue'
 import BorrowingsPage from './Borrowings.vue'
+import AdminsPage from './AdminsPage.vue'
 
 const activeTab = ref('books')
 const showAdminTab = ref(false)
@@ -40,7 +41,7 @@ const currentComponent = computed(() => {
     case 'borrowings':
       return BorrowingsPage
     case 'admins':
-      return () => import('./AdminsPage.vue')
+      return AdminsPage
     default:
       return BooksPage
   }

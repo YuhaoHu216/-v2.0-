@@ -4,7 +4,27 @@
       <!-- 高级搜索表单 -->
       <div class="advanced-search">
         <div class="search-row">
-          <input type="text" v-model="searchParams.username" placeholder="用户名" class="search-input">
+          <el-input v-model="searchParams.adminId" placeholder="管理员ID" class="search-input" />
+          <el-input v-model="searchParams.username" placeholder="用户名" class="search-input" />
+          <el-input v-model="searchParams.realName" placeholder="真实姓名" class="search-input" />
+        </div>
+        <div class="search-row">
+          <el-date-picker
+            v-model="searchParams.startTime"
+            type="date"
+            placeholder="开始时间"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            class="search-input"
+          />
+          <el-date-picker
+            v-model="searchParams.endTime"
+            type="date"
+            placeholder="结束时间"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            class="search-input"
+          />
           <el-button type="primary" @click="searchAdmins">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" style="margin-left: auto" @click="showAddAdminModal">添加管理员</el-button>
@@ -66,6 +86,7 @@
           <tr>
             <th>ID</th>
             <th>用户名</th>
+            <th>真实姓名</th>
             <th>管理员类型</th>
             <th>最后登录时间</th>
             <th>操作</th>
@@ -75,6 +96,7 @@
           <tr v-for="admin in admins" :key="admin.adminId">
             <td>{{ admin.adminId }}</td>
             <td>{{ admin.username }}</td>
+            <td>{{ admin.realName || '-' }}</td>
             <td>{{ admin.adminType === 1 ? '超级管理员' : '普通管理员' }}</td>
             <td>{{ admin.lastLogin || '从未登录' }}</td>
             <td>
@@ -84,7 +106,7 @@
             </td>
           </tr>
           <tr v-if="admins.length === 0">
-            <td colspan="5" class="no-data">暂无数据</td>
+            <td colspan="6" class="no-data">暂无数据</td>
           </tr>
         </tbody>
       </table>
@@ -100,7 +122,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElButton, ElMessage, ElMessageBox } from 'element-plus'
+import { ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElButton, ElMessage, ElMessageBox, ElDatePicker } from 'element-plus'
 import PageContainer from './PageContainer.vue'
 import { getAdminsPage, addAdmin, updateAdmin, deleteAdmin, resetAdminPassword } from '../api/admins.js'
 
@@ -114,7 +136,11 @@ const pagination = ref({
 })
 // 搜索参数
 const searchParams = ref({
-  username: ''
+  adminId: '',
+  username: '',
+  realName: '',
+  startTime: '',
+  endTime: ''
 })
 
 // 新增管理员表单数据
@@ -296,7 +322,11 @@ const fetchAdmins = async (pageNum = 1) => {
 // 重置搜索条件
 const resetSearch = () => {
   searchParams.value = {
-    username: ''
+    adminId: '',
+    username: '',
+    realName: '',
+    startTime: '',
+    endTime: ''
   }
   fetchAdmins(1)
 }

@@ -2,13 +2,30 @@ import { get, post, put, del } from './http.js';
 
 // 获取管理员分页数据
 export async function getAdminsPage(pageNum = 1, pageSize = 10, searchParams = {}) {
+  // 构建请求数据，过滤掉空值
   const requestData = {
     pageNum: pageNum,
-    pageSize: pageSize,
-    ...searchParams
+    pageSize: pageSize
   };
   
-  return await post('/admins/page', requestData);
+  // 只添加非空的搜索参数
+  if (searchParams.adminId) {
+    requestData.adminId = parseInt(searchParams.adminId);
+  }
+  if (searchParams.username) {
+    requestData.username = searchParams.username;
+  }
+  if (searchParams.realName) {
+    requestData.realName = searchParams.realName;
+  }
+  if (searchParams.startTime) {
+    requestData.startTime = searchParams.startTime;
+  }
+  if (searchParams.endTime) {
+    requestData.endTime = searchParams.endTime;
+  }
+  
+  return await post('/admin/page/list', requestData);
 }
 
 // 添加管理员
