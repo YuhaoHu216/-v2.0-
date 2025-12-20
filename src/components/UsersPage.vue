@@ -158,7 +158,7 @@
               </el-tag>
             </td>
             <td>
-              <el-button size="small" type="primary" @click="showEditUserModal(user)">编辑</el-button>
+              <!-- <el-button size="small" type="primary" @click="showEditUserModal(user)">编辑</el-button> -->
               <el-button size="small" type="danger" @click="deleteUserById(user.readerId)">删除</el-button>
             </td>
           </tr>
